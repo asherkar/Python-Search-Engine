@@ -14,22 +14,26 @@ while line:
         documents[docId] = {}
         documents[docId]['id'] = docId
         nextLine = f.readline()
-        print(nextLine)
 
         while nextLine and not ('.I ' in nextLine):
-            if '.T' in nextLine:
+            if '.T ' in nextLine:
                 documents[docId]['title'] = f.readline().rstrip()
+
             if '.W' in nextLine:
                 nextLine = f.readline()
                 abstract = ''
                 while nextLine and not re.match(r'[.][A-Z]\s', nextLine):
-                    print(re.match(r'[.][A-Z]\s', nextLine))
-                    print(nextLine)
                     abstract += ' ' + nextLine.rstrip()
                     nextLine = f.readline()
                 documents[docId]['abstract'] = abstract
+
+            if '.B' in nextLine:
+                documents[docId]['publication'] = f.readline().rstrip()
+            if '.A' in nextLine:
+                documents[docId]['author'] = f.readline().rstrip()
+
             nextLine = f.readline()
-            print(nextLine)
+
 
     line = f.readline() if nextLine is None else nextLine
         
