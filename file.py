@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import re
 
 documents = {}
@@ -41,7 +41,7 @@ while line:
 
 for doc_id, document in documents.items():
     for index, word in enumerate(document['abstract'].split(' ')):
-        word = word.replace([',', '.'], '')
+        word = word.replace(',', '').replace('.', '')
         if len(word) > 0:
             if word not in terms.keys():
                 terms[word] = {}
