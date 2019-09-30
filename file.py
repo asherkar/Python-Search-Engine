@@ -2,6 +2,7 @@
 import re
 
 documents = {}
+terms = {}
 f = open('cacm/test.txt', 'r')
 
 line = f.readline()
@@ -16,9 +17,6 @@ while line:
         nextLine = f.readline()
 
         while nextLine and not ('.I ' in nextLine):
-            if '.T ' in nextLine:
-                documents[docId]['title'] = f.readline().rstrip()
-
             if '.W' in nextLine:
                 nextLine = f.readline()
                 abstract = ''
@@ -27,6 +25,9 @@ while line:
                     nextLine = f.readline()
                 documents[docId]['abstract'] = abstract
 
+            if '.T ' in nextLine:
+                documents[docId]['title'] = f.readline().rstrip()
+
             if '.B' in nextLine:
                 documents[docId]['publication'] = f.readline().rstrip()
             if '.A' in nextLine:
@@ -34,9 +35,24 @@ while line:
 
             nextLine = f.readline()
 
-
     line = f.readline() if nextLine is None else nextLine
-        
-    
-print(documents)
 
+# print(documents)
+
+for doc_id, document in documents.items():
+    for index, word in enumerate(document['abstract'].split(' ')):
+        word = word.replace([',', '.'], '')
+        if len(word) > 0:
+            if word not in terms.keys():
+                terms[word] = {}
+
+            if doc_id not in terms[word].keys():
+                terms[word][doc_id] = {
+                    'frequency': 0,
+                    'position': []
+                }
+
+            terms[word][doc_id]['frequency'] += 1
+            terms[word][doc_id]['position'].append(index)
+
+print(terms)
