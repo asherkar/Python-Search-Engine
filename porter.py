@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 """Porter Stemming Algorithm
 This is the Porter stemming algorithm, ported to Python from the
@@ -363,5 +363,5 @@ if __name__ == '__main__':
                             output += p.stem(word, 0,len(word)-1)
                             word = ''
                         output += c.lower()
-                print output,
+                print (output, end=" ")
             infile.close()
