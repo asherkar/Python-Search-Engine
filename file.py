@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import re
+import json
 
 documents = {}
 terms = {}
 termsDictionary = {}
-f = open('cacm/test.txt', 'r')
+f = open('cacm/cacm.all', 'r')
 
 line = f.readline()
 while line:
@@ -61,4 +62,12 @@ for doc_id, document in documents.items():
 for term, value in terms.items():
     termsDictionary[term] = len(value)
 
-print(termsDictionary)
+f.close()
+
+f = open('dictionary.json', 'w+')
+
+f.write(json.dumps(termsDictionary))
+f.close()
+
+f = open('posting-list.json', 'w+')
+f.write(json.dumps(terms))
