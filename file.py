@@ -84,4 +84,4 @@ f.close()
 
 now = time.time() ##stop timer
 
-print("total time: " , now-then, " seconds")
+print("total time: " , round(now-then, 3), " seconds")
