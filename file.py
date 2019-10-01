@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import re
 import json
-import porter
+from porter import PorterStemmer
 documents = {}
 terms = {}
 termsDictionary = {}
 f = open('cacm/cacm.all', 'r')
 
 line = f.readline()
+p = PorterStemmer()
 while line:
     line = line
     nextLine = None
@@ -39,12 +40,12 @@ while line:
 
     line = f.readline() if nextLine is None else nextLine
 
-print(documents)
-
 for doc_id, document in documents.items():
     if 'abstract' in document:
         for index, word in enumerate(document['abstract'].split(' ')):
-            word = word.replace(',', '').replace('.', '').replace('(', '').replace(')', '')
+            for a in [',', '.', '{', '}', '(', ')', ';', ':', '"', '\'']:
+                word = word.replace(a, '')
+            word = p.stem(word, 0, len(word) - 1)
             word = word.rstrip().lower()
             if len(word) > 0:
                 if word not in terms.keys():
@@ -71,3 +72,5 @@ f.close()
 f = open('posting-list.json', 'w+')
 f.write(json.dumps(terms))
 f.close()
+
+print(len(terms.keys()))
