@@ -2,6 +2,11 @@
 import re
 import json
 from porter import PorterStemmer
+import time
+import random
+
+then = time.time()       ##start timer
+
 documents = {}
 terms = {}
 termsDictionary = {}
@@ -73,4 +78,10 @@ f = open('posting-list.json', 'w+')
 f.write(json.dumps(terms))
 f.close()
 
-print(len(terms.keys()))
+
+#test = input("type hello ")
+#print(test)
+
+now = time.time() ##stop timer
+
+print("total time: " , round(now-then, 3), " seconds")
