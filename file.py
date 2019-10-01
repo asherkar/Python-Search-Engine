@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
+
 import re
 import json
 import porter
+import time
+import random
+
+then = time.time()       ##start timer
+
 documents = {}
 terms = {}
 termsDictionary = {}
@@ -71,3 +77,11 @@ f.close()
 f = open('posting-list.json', 'w+')
 f.write(json.dumps(terms))
 f.close()
+
+
+#test = input("type hello ")
+#print(test)
+
+now = time.time() ##stop timer
+
+print("total time: " , now-then, " seconds")
