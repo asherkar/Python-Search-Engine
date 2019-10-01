@@ -3,6 +3,7 @@ import re
 
 documents = {}
 terms = {}
+termsDictionary = {}
 f = open('cacm/test.txt', 'r')
 
 line = f.readline()
@@ -40,19 +41,24 @@ while line:
 # print(documents)
 
 for doc_id, document in documents.items():
-    for index, word in enumerate(document['abstract'].split(' ')):
-        word = word.replace(',', '').replace('.', '')
-        if len(word) > 0:
-            if word not in terms.keys():
-                terms[word] = {}
+    if 'abstract' in document:
+        for index, word in enumerate(document['abstract'].split(' ')):
+            word = word.replace(',', '').replace('.', '')
+            word = word.lower()
+            if len(word) > 0:
+                if word not in terms.keys():
+                    terms[word] = {}
 
-            if doc_id not in terms[word].keys():
-                terms[word][doc_id] = {
-                    'frequency': 0,
-                    'position': []
-                }
+                if doc_id not in terms[word].keys():
+                    terms[word][doc_id] = {
+                        'frequency': 0,
+                        'position': []
+                    }
 
-            terms[word][doc_id]['frequency'] += 1
-            terms[word][doc_id]['position'].append(index)
+                terms[word][doc_id]['frequency'] += 1
+                terms[word][doc_id]['position'].append(index)
 
-print(terms)
+for term, value in terms.items():
+    termsDictionary[term] = len(value)
+
+print(termsDictionary)
