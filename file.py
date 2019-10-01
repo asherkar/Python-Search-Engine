@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import re
 import json
-
+import porter
 documents = {}
 terms = {}
 termsDictionary = {}
@@ -39,7 +39,7 @@ while line:
 
     line = f.readline() if nextLine is None else nextLine
 
-# print(documents)
+print(documents)
 
 for doc_id, document in documents.items():
     if 'abstract' in document:
