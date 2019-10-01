@@ -44,8 +44,8 @@ print(documents)
 for doc_id, document in documents.items():
     if 'abstract' in document:
         for index, word in enumerate(document['abstract'].split(' ')):
-            word = word.replace(',', '').replace('.', '')
-            word = word.lower()
+            word = word.replace(',', '').replace('.', '').replace('(', '').replace(')', '')
+            word = word.rstrip().lower()
             if len(word) > 0:
                 if word not in terms.keys():
                     terms[word] = {}
@@ -65,9 +65,9 @@ for term, value in terms.items():
 f.close()
 
 f = open('dictionary.json', 'w+')
-
 f.write(json.dumps(termsDictionary))
 f.close()
 
 f = open('posting-list.json', 'w+')
 f.write(json.dumps(terms))
+f.close()
