@@ -5,22 +5,24 @@ from porter import PorterStemmer
 import time
 import random
 
-then = time.time()       ##start timer
-
 documents = {}
 terms = {}
 termsDictionary = {}
 
 
-class File:
+class Invert:
 
     f = None
     p = None
+    then = None
 
     def __init__(self):
+        then = time.time()  ##start timer
         f = open('cacm/cacm.all', 'r')
         p = PorterStemmer()
         self.parse_documents(f, p)
+        now = time.time()  ##stop timer
+        print("total time: ", round(now - then, 3), " seconds")
 
     def parse_documents(self, f, p):
         line = f.readline()
@@ -30,8 +32,13 @@ class File:
 
             if '.I ' in line:
                 docId = re.sub('.I ', '', line).rstrip()
-                documents[docId] = {}
-                documents[docId]['id'] = docId
+                documents[docId] = {
+                    'id': docId,
+                    'title': '',
+                    'abstract': '',
+                    'publication': '',
+                    'author': ''
+                }
                 nextLine = f.readline()
 
                 while nextLine and not ('.I ' in nextLine):
@@ -43,8 +50,9 @@ class File:
                             nextLine = f.readline()
                         documents[docId]['abstract'] = abstract
 
-                    if '.T ' in nextLine:
+                    if '.T' in nextLine:
                         documents[docId]['title'] = f.readline().rstrip()
+                        print(documents[docId]['title'])
 
                     if '.B' in nextLine:
                         documents[docId]['publication'] = f.readline().rstrip()
@@ -56,6 +64,9 @@ class File:
             line = f.readline() if nextLine is None else nextLine
 
         for doc_id, document in documents.items():
+            print(docId)
+            print(document)
+            # TODO fix id issue
             if 'abstract' in document:
                 for index, word in enumerate(document['abstract'].split(' ')):
                     for a in [',', '.', '{', '}', '(', ')', ';', ':', '"', '\'']:
@@ -70,8 +81,10 @@ class File:
                         if doc_id not in terms[word].keys():
                             terms[word][doc_id] = {
                                 'frequency': 0,
-                                'position': []
+                                'position': [],
+                                'title': documents[docId]['title']
                             }
+                            print(documents[docId]['title'])
 
                         terms[word][doc_id]['frequency'] += 1
                         terms[word][doc_id]['position'].append(index)
@@ -88,8 +101,3 @@ class File:
         f = open('posting-list.json', 'w+')
         f.write(json.dumps(terms))
         f.close()
-
-
-    now = time.time() ##stop timer
-
-    print("total time: ", round(now-then, 3), " seconds")
