@@ -10,6 +10,7 @@ class Test:
     posting_list = {}
     term_dictionary = {}
     invert = Invert()
+    search_times = []
 
     def __init__(self):
         self.stopword_toggle = False
@@ -65,6 +66,8 @@ class Test:
                         break
                     use_stemming = input('please enter y or n\n')
             elif data == 'ZZEND':
+                average_search_time = round(sum(self.search_times) / len(self.search_times), 3, 'seconds')
+                print('Average search time:', average_search_time)
                 print('exiting program')
                 exit()
             else:
@@ -108,8 +111,8 @@ class Test:
                         end_pos = len(abstract) -1
                         start_pos = end_pos - 10
 
-                for word in abstract[start_pos:end_pos]:
-                    summary += word + ' '
+                for term in abstract[start_pos:end_pos]:
+                    summary += term + ' '
 
                 document = {
                     'doc_id': doc_id,
@@ -122,7 +125,9 @@ class Test:
 
             print(json.dumps(found_documents, indent=4, sort_keys=True))
             end_time = time.time()  ##start timer
-            print("Found " + str(self.term_dictionary[word]) + "  items in ", round(end_time - start_time, 3), " seconds")
+            search_time = round(end_time - start_time, 3)
+            self.search_times.append(search_time)
+            print("Found", str(self.term_dictionary[word]), "items in", search_time, "seconds")
         else:
             print('No results found for the term ' + word)
 

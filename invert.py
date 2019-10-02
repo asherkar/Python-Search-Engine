@@ -2,8 +2,6 @@
 import re
 import json
 from porter import PorterStemmer
-import time
-import random
 
 
 class Invert:
@@ -16,11 +14,8 @@ class Invert:
     termsDictionary = {}
 
     def __init__(self, stopword_toggle = False, stemming_toggle = False):
-        then = time.time()  ##start timer
         self.documents = self.parse_documents()
         self.create_posting_list(stopword_toggle, stemming_toggle)
-        now = time.time()  ##stop timer
-        print("total time: ", round(now - then, 3), " seconds")
 
     def parse_documents(self):
         f = open('cacm/cacm.all', 'r')
