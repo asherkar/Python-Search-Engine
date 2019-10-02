@@ -5,99 +5,116 @@ from porter import PorterStemmer
 import time
 import random
 
-documents = {}
-terms = {}
-termsDictionary = {}
-
 
 class Invert:
 
     f = None
     p = None
     then = None
+    documents = {}
+    terms = {}
+    termsDictionary = {}
 
-    def __init__(self):
+    def __init__(self, stopword_toggle = False, stemming_toggle = False):
         then = time.time()  ##start timer
-        f = open('cacm/cacm.all', 'r')
-        p = PorterStemmer()
-        self.parse_documents(f, p)
+        self.documents = self.parse_documents()
+        self.create_posting_list(stopword_toggle, stemming_toggle)
         now = time.time()  ##stop timer
         print("total time: ", round(now - then, 3), " seconds")
 
-    def parse_documents(self, f, p):
+    def parse_documents(self):
+        f = open('cacm/cacm.all', 'r')
+        documents = self.documents
         line = f.readline()
         while line:
-            line = line
-            nextLine = None
+            next_line = None
 
             if '.I ' in line:
-                docId = re.sub('.I ', '', line).rstrip()
-                documents[docId] = {
-                    'id': docId,
+                doc_id = re.sub('.I ', '', line).rstrip()
+                documents[doc_id] = {
+                    'id': doc_id,
                     'title': '',
                     'abstract': '',
                     'publication': '',
                     'author': ''
                 }
-                nextLine = f.readline()
+                next_line = f.readline()
 
-                while nextLine and not ('.I ' in nextLine):
-                    if '.W' in nextLine:
-                        nextLine = f.readline()
+                while next_line and not ('.I ' in next_line):
+                    if '.W' in next_line:
+                        next_line = f.readline()
                         abstract = ''
-                        while nextLine and not re.match(r'[.][A-Z]\s', nextLine):
-                            abstract += ' ' + nextLine.rstrip()
-                            nextLine = f.readline()
-                        documents[docId]['abstract'] = abstract
+                        while next_line and not re.match(r'[.][A-Z]\s', next_line):
+                            abstract += ' ' + next_line.rstrip()
+                            next_line = f.readline()
+                        documents[doc_id]['abstract'] = abstract
 
-                    if '.T' in nextLine:
-                        documents[docId]['title'] = f.readline().rstrip()
-                        print(documents[docId]['title'])
+                    if '.T' in next_line:
+                        documents[doc_id]['title'] = f.readline().rstrip()
 
-                    if '.B' in nextLine:
-                        documents[docId]['publication'] = f.readline().rstrip()
-                    if '.A' in nextLine:
-                        documents[docId]['author'] = f.readline().rstrip()
+                    if '.B' in next_line:
+                        documents[doc_id]['publication'] = f.readline().rstrip()
+                    if '.A' in next_line:
+                        documents[doc_id]['author'] = f.readline().rstrip()
 
-                    nextLine = f.readline()
+                    next_line = f.readline()
 
-            line = f.readline() if nextLine is None else nextLine
+            line = f.readline() if next_line is None else next_line
 
+        f.close()
+        return documents
+
+    def create_posting_list(self, stopword_toggle, stemming_toggle):
+        self.terms = {}
+        self.termsDictionary = {}
+        documents = self.documents
+        stopwords = []
+        if stopword_toggle:
+            stopwords = self.fetch_stopwords()
         for doc_id, document in documents.items():
-            print(docId)
-            print(document)
-            # TODO fix id issue
             if 'abstract' in document:
                 for index, word in enumerate(document['abstract'].split(' ')):
-                    for a in [',', '.', '{', '}', '(', ')', ';', ':', '"', '\'']:
-                        word = word.replace(a, '')
-                    word = p.stem(word, 0, len(word) - 1)
                     word = word.rstrip().lower()
 
-                    if len(word) > 0:
-                        if word not in terms.keys():
-                            terms[word] = {}
+                    for a in [',', '.', '{', '}', '(', ')', ';', ':', '"', '\'']:
+                        if a in word:
+                            if word.index(a) == 0 or word.index(a) == len(word) - 1:
+                                word = word.replace(a, '')
+                    if stemming_toggle:
+                        p = PorterStemmer()
+                        word = p.stem(word, 0, len(word) - 1)
 
-                        if doc_id not in terms[word].keys():
-                            terms[word][doc_id] = {
+                    if word in stopwords:
+                        continue
+
+                    if len(word) > 0:
+                        if word not in self.terms.keys():
+                            self.terms[word] = {}
+
+                        if doc_id not in self.terms[word].keys():
+                            self.terms[word][doc_id] = {
                                 'frequency': 0,
                                 'position': [],
-                                'title': documents[docId]['title']
                             }
-                            print(documents[docId]['title'])
 
-                        terms[word][doc_id]['frequency'] += 1
-                        terms[word][doc_id]['position'].append(index)
+                        self.terms[word][doc_id]['frequency'] += 1
+                        self.terms[word][doc_id]['position'].append(index)
 
-        for term, value in terms.items():
-            termsDictionary[term] = len(value)
+        for term, value in self.terms.items():
+            self.termsDictionary[term] = len(value)
 
+        f = open('dictionary.json', 'w')
+        f.write(json.dumps(self.termsDictionary, indent=4, sort_keys=True))
         f.close()
 
-        f = open('dictionary.json', 'w+')
-        f.write(json.dumps(termsDictionary))
+        f = open('posting-list.json', 'w')
+        f.write(json.dumps(self.terms, indent=4, sort_keys=True))
         f.close()
 
-        f = open('posting-list.json', 'w+')
-        f.write(json.dumps(terms))
-        f.close()
+    def fetch_stopwords(self):
+        file = open('cacm/common_words')
+        stopwords = []
+        for word in file:
+            stopwords.append(word.rstrip())
+        file.close()
+        return stopwords
