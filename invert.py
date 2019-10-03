@@ -13,11 +13,21 @@ class Invert:
     terms = {}
     termsDictionary = {}
 
-    def __init__(self, stopword_toggle = False, stemming_toggle = False):
+    def __init__(self):
+        """
+        main function of the application calls the function to create
+        formatted documents object for ease of access
+        """
         self.documents = self.parse_documents()
-        self.create_posting_list(stopword_toggle, stemming_toggle)
 
     def parse_documents(self):
+        """
+        main parser function
+        opens the 'cacm/cacm.all' file and runs through the file
+        creating and adding each document to the documents object
+
+        :return: documents object containing formatted documents
+        """
         f = open('cacm/cacm.all', 'r')
         documents = self.documents
         line = f.readline()
@@ -39,9 +49,11 @@ class Invert:
                     if '.W' in next_line:
                         next_line = f.readline()
                         abstract = ''
+
                         while next_line and not re.match(r'[.][A-Z]\s', next_line):
                             abstract += ' ' + next_line.rstrip()
                             next_line = f.readline()
+
                         documents[doc_id]['abstract'] = abstract
 
                     if '.T' in next_line:
@@ -49,6 +61,7 @@ class Invert:
 
                     if '.B' in next_line:
                         documents[doc_id]['publication'] = f.readline().rstrip()
+
                     if '.A' in next_line:
                         documents[doc_id]['author'] = f.readline().rstrip()
 
@@ -60,6 +73,17 @@ class Invert:
         return documents
 
     def create_posting_list(self, stopword_toggle, stemming_toggle):
+        """
+        function to go through all the documents abstracts cleaning
+        and adding each term to a posting_list object and the
+        term dictionary. removes all the special characters for each
+        term. toggles stopwords and stemming accordingly
+
+        Note: all terms are converted to lowercase
+
+        :param stopword_toggle: boolean, toggles the stopword usage
+        :param stemming_toggle: boolean, toggles the stemming of words
+        """
         self.terms = {}
         self.termsDictionary = {}
         documents = self.documents
@@ -107,6 +131,12 @@ class Invert:
         f.close()
 
     def fetch_stopwords(self):
+        """
+        parses through the file common_words and removed \n
+        from each word.
+
+        :return: stopwords array
+        """
         file = open('cacm/common_words')
         stopwords = []
         for word in file:
